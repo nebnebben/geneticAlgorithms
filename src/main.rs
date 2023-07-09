@@ -5,11 +5,13 @@ mod example_variable;
 mod genetic_algorithm;
 
 fn main() {
-    let example = ExampleVariable::new();
-    example.display();
-    println!("Sum: {}", example.sum());
-    println!("Fitness: {}", example.fitness);
+    // let example = ExampleVariable::new();
+    // example.display();
+    // println!("Sum: {}", example.sum());
+    // println!("Fitness: {}", example.fitness);
 
-    let gen = GeneticAlgorithm::new(100, 0.1);
-    gen.display_pop();
+    let mut gen = GeneticAlgorithm::new(100, 0.05);
+    for i in 0..50 {
+        gen.select_next_generation();
+    }
 }

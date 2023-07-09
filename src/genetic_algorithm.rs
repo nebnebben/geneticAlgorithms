@@ -1,7 +1,9 @@
 use crate::example_variable::ExampleVariable;
 use crate::example_variable::NUM_GENES;
 use rand::Rng;
-const POP_SIZE: u32 = 1;
+use rand::prelude::*;
+use rand::distributions::WeightedIndex;
+const POP_SIZE: usize = 100;
 
 pub struct GeneticAlgorithm {
     pop: [ExampleVariable; POP_SIZE as usize],
@@ -23,6 +25,46 @@ impl GeneticAlgorithm {
         let mut fitnesses: Vec<f64> = self.pop.iter().map(|x| x.fitness).collect();
         fitnesses.sort_by(|a, b| a.partial_cmp(b).unwrap());
         fitnesses.iter().for_each(|x| println!("{}", x));
+    }
+
+    pub fn select_next_generation(&mut self) {
+        self.sort_by_fitness();
+        println!("Best fitness is: {} with {:?} genes", self.pop[0].fitness, self.pop[0].genes);
+
+        let new_pairs: Vec<(ExampleVariable, ExampleVariable)> = self.pick_random_individuals_by_fitness();
+        for i in 0..POP_SIZE {
+            let parent1 = &new_pairs.get(i).unwrap().0;
+            let parent2 = &new_pairs.get(i).unwrap().1;
+            self.pop[i].genes = self.crossover(parent1, parent2);
+            self.pop[i].genes = self.mutate_genes(self.pop[i].genes);
+            self.pop[i].update_fitness();
+        }
+
+    }
+
+    pub fn pick_random_individuals_by_fitness(&mut self) -> Vec<(ExampleVariable, ExampleVariable)> {
+        let total_fitness: f64 = self.pop.iter().map(|x| x.fitness).sum();
+        let relative_fitness: [f64; POP_SIZE as usize] = self.pop.iter()
+            .map(|x| x.fitness/total_fitness)
+            .collect::<Vec<f64>>()
+            .try_into()
+            .unwrap();
+
+        let mut rng = rand::thread_rng();
+        let mut new_pop: Vec<(ExampleVariable, ExampleVariable)> = vec![];
+
+        let mut dist = WeightedIndex::new(&relative_fitness).unwrap();
+        for i in 0..POP_SIZE*2 {
+            let random_index1 = dist.sample(&mut rng);
+            let random_index2 = dist.sample(&mut rng);
+            new_pop.push((self.pop[random_index1].clone(), self.pop[random_index2].clone()));
+        }
+        new_pop
+    }
+
+    pub fn sort_by_fitness(&mut self) {
+        // Sort in reverse order
+        self.pop.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
     }
 
     pub fn mutate_pop(&mut self) {
@@ -63,7 +105,7 @@ impl GeneticAlgorithm {
         new_genes
     }
 
-    pub fn crossoverBLX(&self, ind1: &ExampleVariable, ind2: &ExampleVariable) ->  [f64; 4] {
+    pub fn crossover_blx(&self, ind1: &ExampleVariable, ind2: &ExampleVariable) ->  [f64; 4] {
         let alpha: f64 = 0.1;
         let mut new_genes : [f64; 4] = [0.0; 4];
         let mut rng = rand::thread_rng();
