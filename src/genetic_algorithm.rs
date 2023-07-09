@@ -24,23 +24,28 @@ impl GeneticAlgorithm {
         fitnesses.iter().for_each(|x| println!("{}", x));
     }
 
-    pub fn mutate_pop(&self) {
-        self.pop.iter().for_each(|mut x| self.mutate_individual( x));
+    pub fn mutate_pop(&mut self) {
+        for i in 0..POP_SIZE as usize {
+            self.pop[i].genes = self.mutate_genes(self.pop[i].genes);
+        }
     }
 
-    pub fn mutate_individual(&self, subject: &mut ExampleVariable) {
+    pub fn mutate_genes(&self, genes: [f64; 4]) -> [f64; 4] {
         let alpha: f64 = 0.1;
         let mut rng = rand::thread_rng();
-        for i in 0..subject.genes.len() {
+        let mut new_genes : [f64; 4] = [0.0; 4];
+        for i in 0..genes.len() {
             if rng.gen::<f64>() < self.mutation_rate {
+                new_genes[i] = genes[i];
                 continue
             }
-            let gene = subject.genes[i];
+            let gene = genes[i];
             let min_val: f64 = (gene - (gene*alpha)).max(0.0);
             let max_val: f64 = (gene + (gene*alpha)).min(1.0);
             let new_gene = rng.gen_range(min_val..max_val);
-            subject.genes[i] = new_gene;
+            new_genes[i] = new_gene;
         }
+        new_genes
     }
 
 }
