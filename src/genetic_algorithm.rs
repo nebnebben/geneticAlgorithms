@@ -1,6 +1,7 @@
 use crate::example_variable::ExampleVariable;
+use crate::example_variable::NUM_GENES;
 use rand::Rng;
-const POP_SIZE: u32 = 2;
+const POP_SIZE: u32 = 1;
 
 pub struct GeneticAlgorithm {
     pop: [ExampleVariable; POP_SIZE as usize],
@@ -35,7 +36,7 @@ impl GeneticAlgorithm {
         let mut rng = rand::thread_rng();
         let mut new_genes : [f64; 4] = [0.0; 4];
         for i in 0..genes.len() {
-            if rng.gen::<f64>() < self.mutation_rate {
+            if rng.gen::<f64>() > self.mutation_rate {
                 new_genes[i] = genes[i];
                 continue
             }
@@ -44,6 +45,20 @@ impl GeneticAlgorithm {
             let max_val: f64 = (gene + (gene*alpha)).min(1.0);
             let new_gene = rng.gen_range(min_val..max_val);
             new_genes[i] = new_gene;
+        }
+        new_genes
+    }
+
+    pub fn crossover(&self, ind1: &ExampleVariable, ind2: &ExampleVariable) ->  [f64; 4] {
+        let mut new_genes : [f64; 4] = [0.0; 4];
+        let mut rng = rand::thread_rng();
+        let weighted_chance = (ind1.fitness)/(ind1.fitness+ind2.fitness);
+        for i in 0..ind1.genes.len() {
+            if rng.gen::<f64>() < weighted_chance {
+                new_genes[i] = ind1.genes[i];
+            } else {
+                new_genes[i] = ind2.genes[i];
+            }
         }
         new_genes
     }

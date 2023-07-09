@@ -1,4 +1,5 @@
 use rand::Rng;
+pub(crate) const NUM_GENES: u32 = 4;
 
 #[derive(Clone, Copy)]
 pub struct ExampleVariable {
