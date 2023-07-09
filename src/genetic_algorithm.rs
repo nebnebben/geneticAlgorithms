@@ -32,7 +32,8 @@ impl GeneticAlgorithm {
         println!("Best fitness is: {} with {:?} genes", self.pop[0].fitness, self.pop[0].genes);
 
         let new_pairs: Vec<(ExampleVariable, ExampleVariable)> = self.pick_random_individuals_by_fitness();
-        for i in 0..POP_SIZE {
+        // Allow top 5 best to remain
+        for i in 5..POP_SIZE {
             let parent1 = &new_pairs.get(i).unwrap().0;
             let parent2 = &new_pairs.get(i).unwrap().1;
             self.pop[i].genes = self.crossover(parent1, parent2);
@@ -73,10 +74,10 @@ impl GeneticAlgorithm {
         }
     }
 
-    pub fn mutate_genes(&self, genes: [f64; 4]) -> [f64; 4] {
+    pub fn mutate_genes(&self, genes: [f64; NUM_GENES]) -> [f64; NUM_GENES] {
         let alpha: f64 = 0.1;
         let mut rng = rand::thread_rng();
-        let mut new_genes : [f64; 4] = [0.0; 4];
+        let mut new_genes : [f64; NUM_GENES] = [0.0; NUM_GENES];
         for i in 0..genes.len() {
             if rng.gen::<f64>() > self.mutation_rate {
                 new_genes[i] = genes[i];
@@ -91,8 +92,8 @@ impl GeneticAlgorithm {
         new_genes
     }
 
-    pub fn crossover(&self, ind1: &ExampleVariable, ind2: &ExampleVariable) ->  [f64; 4] {
-        let mut new_genes : [f64; 4] = [0.0; 4];
+    pub fn crossover(&self, ind1: &ExampleVariable, ind2: &ExampleVariable) ->  [f64; NUM_GENES] {
+        let mut new_genes : [f64; NUM_GENES] = [0.0; NUM_GENES];
         let mut rng = rand::thread_rng();
         let weighted_chance = (ind1.fitness)/(ind1.fitness+ind2.fitness);
         for i in 0..ind1.genes.len() {
@@ -105,9 +106,9 @@ impl GeneticAlgorithm {
         new_genes
     }
 
-    pub fn crossover_blx(&self, ind1: &ExampleVariable, ind2: &ExampleVariable) ->  [f64; 4] {
-        let alpha: f64 = 0.1;
-        let mut new_genes : [f64; 4] = [0.0; 4];
+    pub fn crossover_blx(&self, ind1: &ExampleVariable, ind2: &ExampleVariable) ->  [f64; NUM_GENES] {
+        let alpha: f64 = 0.5;
+        let mut new_genes : [f64; NUM_GENES] = [0.0; NUM_GENES];
         let mut rng = rand::thread_rng();
         for i in 0..ind1.genes.len() {
             let gene1 = ind1.genes[i];
