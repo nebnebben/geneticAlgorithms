@@ -63,4 +63,21 @@ impl GeneticAlgorithm {
         new_genes
     }
 
+    pub fn crossoverBLX(&self, ind1: &ExampleVariable, ind2: &ExampleVariable) ->  [f64; 4] {
+        let alpha: f64 = 0.1;
+        let mut new_genes : [f64; 4] = [0.0; 4];
+        let mut rng = rand::thread_rng();
+        for i in 0..ind1.genes.len() {
+            let gene1 = ind1.genes[i];
+            let gene2 = ind2.genes[i];
+            let diff = (gene1 - gene2).abs();
+            let min_val = (gene1.min(gene2) - (diff*alpha)).max(0.0);
+            let max_val = (gene1.max(gene2) + (diff*alpha)).min(1.0);
+            let new_gene = rng.gen_range(min_val..max_val);
+            new_genes[i] = new_gene;
+        }
+        new_genes
+    }
+
+
 }
