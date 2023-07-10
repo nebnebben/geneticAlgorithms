@@ -29,7 +29,7 @@ impl GeneticAlgorithm {
 
     pub fn select_next_generation(&mut self) {
         self.sort_by_fitness();
-        println!("Best fitness is: {} with {:?} genes", self.pop[0].fitness, self.pop[0].genes);
+        println!("Best fitness is: {} with {:?} genes", self.pop[0].fitness, self.pop[0].genes[..2].to_vec());
 
         let new_pairs: Vec<(ExampleVariable, ExampleVariable)> = self.pick_random_individuals_by_fitness();
         // Allow top 5 best to remain
@@ -51,11 +51,11 @@ impl GeneticAlgorithm {
             .try_into()
             .unwrap();
 
-        let mut rng = rand::thread_rng();
+        let mut rng = thread_rng();
         let mut new_pop: Vec<(ExampleVariable, ExampleVariable)> = vec![];
 
         let mut dist = WeightedIndex::new(&relative_fitness).unwrap();
-        for i in 0..POP_SIZE*2 {
+        for _i in 0..POP_SIZE {
             let random_index1 = dist.sample(&mut rng);
             let mut random_index2 = dist.sample(&mut rng);
             while random_index1 == random_index2 {
@@ -79,7 +79,7 @@ impl GeneticAlgorithm {
 
     pub fn mutate_genes(&self, genes: [f64; NUM_GENES]) -> [f64; NUM_GENES] {
         let alpha: f64 = 0.1;
-        let mut rng = rand::thread_rng();
+        let mut rng = thread_rng();
         let mut new_genes : [f64; NUM_GENES] = [0.0; NUM_GENES];
         for i in 0..genes.len() {
             if rng.gen::<f64>() > self.mutation_rate {
@@ -97,7 +97,7 @@ impl GeneticAlgorithm {
 
     pub fn crossover(&self, ind1: &ExampleVariable, ind2: &ExampleVariable) ->  [f64; NUM_GENES] {
         let mut new_genes : [f64; NUM_GENES] = [0.0; NUM_GENES];
-        let mut rng = rand::thread_rng();
+        let mut rng = thread_rng();
         let weighted_chance = (ind1.fitness)/(ind1.fitness+ind2.fitness);
         for i in 0..ind1.genes.len() {
             if rng.gen::<f64>() < weighted_chance {
@@ -112,11 +112,11 @@ impl GeneticAlgorithm {
     pub fn crossover_blx(&self, ind1: &ExampleVariable, ind2: &ExampleVariable) ->  [f64; NUM_GENES] {
         let alpha: f64 = 0.5;
         let mut new_genes : [f64; NUM_GENES] = [0.0; NUM_GENES];
-        let mut rng = rand::thread_rng();
+        let mut rng = thread_rng();
         for i in 0..ind1.genes.len() {
             let gene1 = ind1.genes[i];
             let gene2 = ind2.genes[i];
-            let diff = (gene1 - gene2).abs();
+            let diff = (gene1 - gene2).abs().max(0.01);
             let min_val = (gene1.min(gene2) - (diff*alpha)).max(0.0);
             let max_val = (gene1.max(gene2) + (diff*alpha)).min(1.0);
             let new_gene = rng.gen_range(min_val..max_val);
