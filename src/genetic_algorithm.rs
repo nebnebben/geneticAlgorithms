@@ -36,7 +36,7 @@ impl GeneticAlgorithm {
         for i in 5..POP_SIZE {
             let parent1 = &new_pairs.get(i).unwrap().0;
             let parent2 = &new_pairs.get(i).unwrap().1;
-            self.pop[i].genes = self.crossover(parent1, parent2);
+            self.pop[i].genes = self.crossover_blx(parent1, parent2);
             self.pop[i].genes = self.mutate_genes(self.pop[i].genes);
             self.pop[i].update_fitness();
         }
@@ -57,7 +57,10 @@ impl GeneticAlgorithm {
         let mut dist = WeightedIndex::new(&relative_fitness).unwrap();
         for i in 0..POP_SIZE*2 {
             let random_index1 = dist.sample(&mut rng);
-            let random_index2 = dist.sample(&mut rng);
+            let mut random_index2 = dist.sample(&mut rng);
+            while random_index1 == random_index2 {
+                random_index2 = dist.sample(&mut rng);
+            }
             new_pop.push((self.pop[random_index1].clone(), self.pop[random_index2].clone()));
         }
         new_pop
